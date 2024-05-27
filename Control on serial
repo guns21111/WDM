@@ -1,0 +1,50 @@
+#include <SPI.h>
+
+// Define the CS pin for the MCP41010 (change this to the correct pin if necessary)
+#define CS_PIN 10
+
+void setup() {
+  // Set the CS pin as output
+  pinMode(CS_PIN, OUTPUT);
+
+  // Start SPI communication
+  SPI.begin();
+
+  // Start Serial communication
+  Serial.begin(9600);
+
+  // Set the potentiometer to maximum resistance
+  setResistance(255);
+}
+
+void loop() {
+  // Check if data is available to read
+  if (Serial.available() > 0) {
+    // Read the incoming byte
+    char incomingByte = Serial.read();
+
+    // Check if the incoming byte is '1'
+    if (incomingByte == '1') {
+      // Gradually decrease the resistance from maximum to minimum
+      for (int i = 255; i >= 0; i--) {
+        setResistance(i);
+        delay(10); // Wait for 10ms
+      }
+    }
+  }
+}
+
+void setResistance(int value) {
+  // Ensure the value is within the valid range (0-255)
+  value = constrain(value, 40, 255);
+
+  // Select the MCP41010
+  digitalWrite(CS_PIN, LOW);
+
+  // Send the command and value to the MCP41010
+  SPI.transfer(0x11); // The command for potentiometer 0 (0x11)
+  SPI.transfer(value); // The resistance value (0-255)
+
+  // Deselect the MCP41010
+  digitalWrite(CS_PIN, HIGH);
+}
