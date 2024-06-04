@@ -1,0 +1,31 @@
+#include <Wire.h>
+#include <Adafruit_PWMServoDriver.h>
+
+// Create a PCA9685 instance
+Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver();
+
+#define SERVO_MIN_PULSE 150   // Minimum pulse length for servo
+#define SERVO_MAX_PULSE 600   // Maximum pulse length for servo
+#define SERVO_NEUTRAL_PULSE (SERVO_MIN_PULSE + SERVO_MAX_PULSE) / 2 // Neutral position
+
+#define SERVO_CHANNEL 0       // Channel on the PCA9685 driver the servo is connected to
+
+void setup() {
+  Serial.begin(9600);
+  pwm.begin();
+  pwm.setPWMFreq(60);  // Set frequency to 60 Hz
+}
+
+void loop() {
+  if (Serial.available()) {
+    char ch = Serial.read();
+
+    if (ch == '1') {
+      // Move servo to neutral position
+      pwm.setPWM(SERVO_CHANNEL, 0, SERVO_NEUTRAL_PULSE);
+      delay(1000); // Wait for 1 second to ensure the servo has reached the neutral position
+      // Turn off the servo (set pulse length to 0)
+      pwm.setPWM(SERVO_CHANNEL, 0, 0);
+    }
+  }
+}
